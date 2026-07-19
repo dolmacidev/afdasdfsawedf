@@ -8,6 +8,7 @@ const {
   Colors,
 } = require('discord.js');
 const panelCmd = require('../commands/panel');
+const { readJSON, writeJSON } = require('../database');
 
 const CATEGORIES = panelCmd.CATEGORIES;
 const CATEGORY_NAMES = panelCmd.CATEGORY_NAMES;
@@ -143,9 +144,7 @@ module.exports = async (interaction) => {
             `**Kategori:** ${CATEGORY_NAMES[categoryKey]}\n` +
             `**Ticket ID:** \`${ticketChannel.id}\``
         )
-        .setFooter({
-          text: 'Development by dethrxn • discord.gg/craftfrostia',
-        })
+        .setFooter({ text: 'discord.gg/craftfrostia' })
         .setTimestamp();
 
       const claimRow = new ActionRowBuilder().addComponents(
@@ -263,17 +262,14 @@ module.exports = async (interaction) => {
 
     const claimEmbed = new EmbedBuilder()
       .setColor(Colors.Green)
-      .setDescription(`🙋 **${member}** bu ticketi üstlendi.`)
-      .setFooter({
-        text: 'Development by dethrxn • discord.gg/craftfrostia',
-      });
+      .setDescription(`🙋 **${member}** bu ticketi üstlendi.`);
 
     await ticketChannel.send({ embeds: [claimEmbed] });
 
-    const claims = interaction.client.db.readJSON('claims.json');
+    const claims = readJSON('claims.json');
     if (!claims[guild.id]) claims[guild.id] = {};
     claims[guild.id][member.id] = (claims[guild.id][member.id] || 0) + 1;
-    interaction.client.db.writeJSON('claims.json', claims);
+    writeJSON('claims.json', claims);
 
     await ticketChannel.setTopic(
       `${ticketChannel.topic} | claimed:${member.id}`
@@ -300,12 +296,15 @@ module.exports = async (interaction) => {
     const closeEmbed = new EmbedBuilder()
       .setColor(Colors.DarkRed)
       .setTitle('🔒 Ticket Kapatılıyor')
-      .setDescription('Ticket 5 saniye içinde kapatılacak.')
-      .setFooter({
-        text: 'Development by dethrxn • discord.gg/craftfrostia',
-      });
+      .setDescription(`Ticket **${member.user.username}** tarafından kapatılıyor.`)
+      .setFooter({ text: 'discord.gg/craftfrostia' });
 
     await interaction.reply({ embeds: [closeEmbed] });
+
+    const closes = readJSON('closes.json');
+    if (!closes[guild.id]) closes[guild.id] = {};
+    closes[guild.id][member.id] = (closes[guild.id][member.id] || 0) + 1;
+    writeJSON('closes.json', closes);
 
     setTimeout(async () => {
       try {

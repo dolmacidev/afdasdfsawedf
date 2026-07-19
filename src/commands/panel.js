@@ -46,9 +46,7 @@ module.exports = {
             .map(([key]) => `${CATEGORY_EMOJIS[key]} **${CATEGORY_NAMES[key]}**`)
             .join('\n')
       )
-      .setFooter({
-        text: 'Development by dethrxn • discord.gg/craftfrostia',
-      });
+      .setFooter({ text: 'discord.gg/craftfrostia' });
 
     const row = new ActionRowBuilder().addComponents(
       Object.entries(CATEGORIES).map(([key, id]) =>
